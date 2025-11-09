@@ -54,6 +54,9 @@ clean:
 	rm -f $(modname).asm $(modname).map $(modname).symbols
 	rm -rf src pkg kmod_s5divert-dkms*.pkg.tar*
 
+distclean: clean
+	rm -f dkms.conf modules-load.conf
+
 install: modules
 	$(MAKE) -C $(KDIR) M=$(PWD) modules_install INSTALL_MOD_DIR=$(INSTALL_MOD_DIR) INSTALL_MOD_PATH=$(INSTALL_MOD_PATH)
 ifeq ($(strip $(INSTALL_MOD_PATH)),)

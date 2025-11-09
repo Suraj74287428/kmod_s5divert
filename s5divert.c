@@ -738,10 +738,10 @@ MODULE_AUTHOR("rbm78bln");
 MODULE_LICENSE("GPL");
 
 MODULE_PARM_DESC(enabled, " Enable/disable diversion of ACPI S5 to either\n"
-	"                   0: diversion disabled\n"
-	"                   1: ACPI state S4 (without saving) [default]\n"
-	"                   2: ACPI state S3 (without return vector)\n"
-	"                   3: ACPI state S0 (reboot)");
+    		"                   0: diversion disabled\n"
+			"                   1: ACPI state S4 (without saving) [default]\n"
+			"                   2: ACPI state S3 (without return vector)\n"
+			"                   3: ACPI state S0 (reboot)");
 MODULE_PARM_DESC(poweroff, " Instantly power off the system. Default: 0");
 MODULE_PARM_DESC(reboot, " Instantly reboot the system. Default: 0");
 MODULE_PARM_DESC(stroff, " Instantly enter ACPI state S3 and reboot the system right away after waking up. Default: 0");
