@@ -53,11 +53,11 @@ static struct proc_dir_entry *proc_file_s5divert_poweroff = NULL;
 static struct proc_dir_entry *proc_file_s5divert_reboot = NULL;
 static struct proc_dir_entry *proc_file_s5divert_stroff = NULL;
 
+static struct kobject *sysfs_dir_s5divert = NULL;
+
 //static struct workqueue_struct *wq = NULL;
 //static void wq_worker(struct work_struct *work);
 //static DECLARE_WORK(wq_work, wq_worker);
-
-static struct kobject *sysfs_dir_s5divert = NULL;
 
 static void system_poweroff(void);
 static void system_reboot(bool hard);
