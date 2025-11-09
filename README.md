@@ -65,7 +65,7 @@ This trigger behaves differently from the others. Since some systems cannot reli
 
 When this trigger is activated, the module forces the system to enter ACPI S3 state immediately and automatically reboots once it resumes from that state. So technically speaking, the system does return from suspend-to-RAM correctly, but it will reboot immediately afterward regardless.
 
-Because ACPI S3 state cannot be entered cleanly while the kernel is already shutting down, this trigger cannot be used as a redirection target via the ```enabled``` parameter. However, correct operation of this trigger does not depend on the system’s firmware implementation so much.
+Because ACPI S3 state cannot be entered cleanly while the kernel is already shutting down, this trigger cannot be used as a redirection target via the ```enabled``` parameter. However, correct operation of this trigger does not depend on the system’s firmware implementation as much.
 
 Note that this state consumes significantly more power while suspended.
 
