@@ -31,11 +31,13 @@ source=(
 	'Makefile'
 	'PKGBUILD'
 	'README.md'
-    'dkms_conf.template'
-    's5divert.c'
-    's5divert.install'
+	'dkms_conf.template'
+	'modprobe.conf'
+	's5divert.c'
+	's5divert.install'
 )
 sha256sums=(
+	'SKIP'
 	'SKIP'
 	'SKIP'
 	'SKIP'
@@ -72,5 +74,6 @@ package() {
 	   install -Dm644 ${srcdir}/${pkgname}/${FILE} "${pkgdir}"/usr/src/${pkgname}/${FILE}
 	done
 	install -Dm644 ${srcdir}/${pkgname}/dkms.conf "${pkgdir}"/usr/src/${pkgname}/dkms.conf
+	install -Dm644 ${srcdir}/${pkgname}/modprobe.conf "${pkgdir}"/etc/modprobe.d/${_pkgbase}.conf
 	install -Dm644 ${srcdir}/${pkgname}/modules-load.conf "${pkgdir}"/etc/modules-load.d/${_pkgbase}.conf
 }
