@@ -35,8 +35,10 @@ source=(
 	'modprobe.conf'
 	's5divert.c'
 	's5divert.install'
+	's5divert.shutdown'
 )
 sha256sums=(
+	'SKIP'
 	'SKIP'
 	'SKIP'
 	'SKIP'

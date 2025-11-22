@@ -1,0 +1,248 @@
+#!/bin/bash
+
+########################################################
+## /usr/lib/systemd/system-shutdown/s5divert.shutdown ##
+##----------------------------------------------------##
+## Example script                                     ##
+## on how to use s5divert.ko's runtime triggers       ##
+########################################################
+
+usage() {
+cat <<EOT
+
+Usage: $0 (halt|poweroff|reboot|kexec)
+
+This script belongs to kmod_s5divert and is
+intended for invocation by systemd-shutdown(8).
+
+Place it at /usr/lib/systemd/system-shutdown/s5divert.shutdown
+and adjust it to fit your requirements and any system-specific behavior.
+
+EOT
+}
+
+set_s5divert() {
+	ARG=$(echo "$1" | sed 's/^disabled$/0/i; s/^S5$/0/i; s/^S4$/1/i; s/^S3$/2/i; s/^reboot$/3/i')
+	echo "${ARG}" > /sys/kernel/s5divert/enabled
+}
+
+S5_diverted() {
+	grep -qx '[1-9]' /sys/kernel/s5divert/enabled 2>/dev/null
+	return $?
+}
+
+S5toS4_diverted() {
+	grep -qFx 1 /sys/kernel/s5divert/enabled 2>/dev/null
+	return $?
+}
+
+S5toS3_diverted() {
+	grep -qFx 2 /sys/kernel/s5divert/enabled 2>/dev/null
+	return $?
+}
+
+S5toReboot_diverted() {
+	grep -qFx 3 /sys/kernel/s5divert/enabled 2>/dev/null
+	return $?
+}
+
+enter_S3off() {
+	echo 0 >/sys/kernel/s5divert/enabled
+	sync && echo u >/proc/sysrq-trigger && sleep 0.3
+	echo 1 >/sys/kernel/s5divert/stroff		# this won't return
+	sleep 3; echo o >/proc/sysrq-trigger	# failsafe
+}
+
+disable_all_wakeup_sources() {
+	find /sys/devices -path '*/power/wakeup' | xargs -r grep -lFx enabled | xargs -r -n1 sh -c 'echo disabled >"$0"'
+	grep -F '*enabled' /proc/acpi/wakeup | cut -f1 | xargs -r -n1 sh -c 'echo "$0" >/proc/acpi/wakeup'
+}
+
+enable_wakeup_sources() {
+	for SRC in "$@"; do
+		grep -Eq "^${SRC}[[:space:]].*disabled[[:space:]]" /proc/acpi/wakeup && echo "${SRC}" >/proc/acpi/wakeup
+	done
+}
+
+enable_lid_wakeup() {
+	grep -E '^LID[0-9]*[[:space:]].*disabled' /proc/acpi/wakeup | cut -f1 | xargs -t -r -n1 sh -c 'echo "$0" >/proc/acpi/wakeup'
+}
+
+disable_lid_wakeup() {
+	grep -E '^LID[0-9]*[[:space:]].*enabled' /proc/acpi/wakeup | cut -f1 | xargs -t -r -n1 sh -c 'echo "$0" >/proc/acpi/wakeup'
+}
+
+lid_closed() {
+	grep -qFx closed /proc/acpi/button/lid/*/state 2>/dev/null || [ "$?" -eq "2" ]
+	return $?
+}
+
+wait_lid_closed() {
+	find_capslock_leds
+
+	capslock_off
+	for i in {1..15}; do lid_closed && break; capslock_toggle; sleep 0.5; done
+	capslock_off
+
+	lid_closed
+	return $?
+}
+
+ac_power_connected() {
+	grep -qFx 1 /sys/class/power_supply/*/online 2>/dev/null || [ "$?" -eq "2" ]
+	return $?
+}
+
+clear_screen() {
+	echo 0 0 0 0 >/proc/sys/kernel/printk
+	chvt 13
+}
+
+turn_lights_off() {
+	echo /sys/class/*/*/brightness | xargs -r -n1 sh -c '[ -w "$0" ] && echo 0 >"$0"'
+}
+
+CAPSLOCK_LEDS=/dev/null
+find_capslock_leds() { CAPSLOCK_LEDS=$(echo /sys/class/leds/*:capslock/brightness | xargs -r -n1 sh -c '[ -f "$0" ] && echo "$0"'); [ -z "${CAPSLOCK_LEDS}" ] && CAPSLOCK_LEDS=/dev/null; }
+capslock_toggle() { xargs -r sh -c 'sed "y/01/10/" <"$0" | tee "$0" "$@" >/dev/null' <<< "$CAPSLOCK_LEDS"; }
+capslock_off() { xargs -r sh -c 'tee "$@" >/dev/null <<< 0' _ <<< "$CAPSLOCK_LEDS"; }
+
+unload_nvidia() {
+	killall -q -w nvidia-persistenced
+	fuser -s -k /dev/nvidia* /dev/dri/card* /dev/dri/render* 2>/dev/null
+	xargs -n1 sh -c 'for i in {1..6}; do [ -d "/sys/module/$0" ] || break; modprobe -r "$0" && break; sleep 0.3; done' <<< "nvidia_drm nvidia_modeset nvidia_uvm nvidia"
+}
+
+#
+# system_poweroff: Selects hardware-specific poweroff handler
+#
+system_poweroff() {
+	sync &
+	read -r DMI_PRODUCT < /sys/devices/virtual/dmi/id/product_name 2>/dev/null || DMI_PRODUCT=unknown
+	case "${DMI_PRODUCT// /_}" in
+		20YU*)	        poweroff_thinkpadp17 ;;
+		StarLite)       poweroff_starlite    ;;
+		HP_Elite_x2_G4) poweroff_hpelitex2   ;;
+		MacBookPro16,1) poweroff_mbp161      ;;
+		MacBookPro11,1) poweroff_mbp111      ;;
+		*|unknown)      poweroff_general     ;;
+	esac
+	return $?
+}
+
+#
+# poweroff_general: Handler for unknown hardware
+#
+# Does nothing by default, but if the hardware
+# does not properly reboot after kernel-level S3
+# then enter S3 in userspace and reboot afterwards.
+# (commented out by default)
+#
+poweroff_general() {
+	# S5toS3_diverted && enter_S3off && return 0
+	return 0
+}
+
+#
+# poweroff_thinkpadp17: Handler for Lenovo ThinkPad P17 Gen2i
+#
+# This system is a quirky "mobile workstation",
+# so let's do some complex shit.
+#
+poweroff_thinkpadp17() {
+	S5_diverted || return 0											# Not diverted: Don't change it.
+	S5toReboot_diverted && return 0									# Reboot instead of S5: Keep it.
+	if S5toS4_diverted || S5toS3_diverted; then						# Whatever sleep state is requested:
+		S5toS3_diverted && ! ac_power_connected && set_s5divert S4	# change it so S4 if not AC powered, or
+		S5toS4_diverted &&   ac_power_connected && set_s5divert S3	# change it to S3 if currently AC powered.
+		enable_lid_wakeup											# The lid plays nicely in any case, so enable it.
+		S5toS4_diverted && return 0									# Target state is now S4? So just do it.
+		if S5toS3_diverted; then									# But if we want to enter S3, we've got stuff to do first:
+			clear_screen											# Clear the screen, don't bother the user.
+			turn_lights_off											# Turn off all the lights, don't bother the user.
+			unload_nvidia											# Unload ugly nvidia drivers. They fcuk up sleep states.
+			enter_S3off												# Finally enter userlevel S3/STR followed by a system reboot.
+		fi
+	fi
+	return 0
+}
+
+#
+# poweroff_starlite: Handler for StarLabs StarLite mkV
+#
+# This system does properly wake up from S3
+# followed by a reboot, so keep it explicitly.
+# S4 on the other hand is useless on this hardware,
+# so just disable S5 diversion in that case.
+#
+poweroff_starlite() {
+	S5toS3_diverted && return 0
+	S5toS4_diverted && set_s5divert disabled && return 0
+	return 0
+}
+
+#
+# poweroff_hpelitex2: Handler for HP Elite x2 G4
+#
+# This system's EC loves to drain its battery.
+# Do not allow S5 to divert into S4 or S3.
+#
+poweroff_hpelitex2() {
+	S5toS3_diverted && set_s5divert disabled && return 0
+	S5toS4_diverted && set_s5divert disabled && return 0
+	return 0
+}
+
+#
+# poweroff_mbp161: Handler for Apple MacBook Pro 16,1
+#
+# This system behaves nicely in S5 already.
+# No diversion of S5 to S4 or S3 required.
+# Also in S3 or S4 the lid would trigger
+# instantly unless it's closed, but S5 is fine.
+#
+poweroff_mbp161() {
+	S5toS3_diverted && set_s5divert disabled && return 0
+	S5toS4_diverted && set_s5divert disabled && return 0
+	return 0
+}
+
+#
+# poweroff_mbp111: Handler for Apple MacBook Pro 11,1
+#
+# This system drains it battery in S3, so divert
+# it to S4 instead if not powered externally.
+# Also the lid triggers instantly unless it's closed,
+# so wait for the lid to close or disable its wake source.
+# Also kernel-level S3 don't work, so do it in userspace.
+#
+poweroff_mbp111() {
+	S5toS3_diverted && ! ac_power_connected && set_s5divert S4
+	if S5toS4_diverted || S5toS3_diverted; then
+		clear_screen && turn_lights_off
+		enable_wakeup_sources ADP1
+		wait_lid_closed && enable_lid_wakeup || disable_lid_wakeup
+		S5toS3_diverted && enter_S3off
+	fi
+	return 0
+}
+
+[ -d /sys/kernel/s5divert ] || exit 0
+
+case "$1" in
+	try)
+	    [ "$UID" -gt "0" ] && exec sudo "$0" "$@"
+		true # NOP
+		echo RC=$?
+	    ;;
+
+	halt|poweroff)
+		system_poweroff
+		;;
+
+	reboot|kexec) ;;
+
+	*) usage ;;
+esac
+
+exit 0
