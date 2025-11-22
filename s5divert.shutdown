@@ -147,7 +147,7 @@ poweroff_general() {
 # poweroff_thinkpadp17: Handler for Lenovo ThinkPad P17 Gen2i
 #
 # This system is a quirky "mobile workstation",
-# so let's do some crazy ass complex shit.
+# so let's do some crazy ass quirky complex shit.
 #
 poweroff_thinkpadp17() {
 	S5_diverted || return 0											# Not diverted: Don't change it.
@@ -162,7 +162,6 @@ poweroff_thinkpadp17() {
 			clear_screen											# Clear the screen, don't bother the user.
 			turn_lights_off											# Turn off all the lights, don't bother the user.
 			unload_nvidia											# Unload ugly nvidia drivers. They fcuk up sleep states.
-			enable_wakeup_sources TXHC XHCI							# Enable XHCI USB 3.2 and Thunderbolt USB 4 wakeup source
 			enter_S3off												# Finally enter userlevel S3/STR followed by a system reboot.
 		fi
 	fi
