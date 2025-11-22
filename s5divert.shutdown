@@ -147,7 +147,7 @@ poweroff_general() {
 # poweroff_thinkpadp17: Handler for Lenovo ThinkPad P17 Gen2i
 #
 # This system is a quirky "mobile workstation",
-# so let's do some complex shit.
+# so let's do some crazy ass complex shit.
 #
 poweroff_thinkpadp17() {
 	S5_diverted || return 0											# Not diverted: Don't change it.
@@ -156,11 +156,13 @@ poweroff_thinkpadp17() {
 		S5toS3_diverted && ! ac_power_connected && set_s5divert S4	# change it so S4 if not AC powered, or
 		S5toS4_diverted &&   ac_power_connected && set_s5divert S3	# change it to S3 if currently AC powered.
 		enable_lid_wakeup											# The lid plays nicely in any case, so enable it.
+		# S5toS3_diverted && set_s5divert S4	                      # change S5toS3 diversion to S5toS4 unconditionally (for now)
 		S5toS4_diverted && return 0									# Target state is now S4? So just do it.
 		if S5toS3_diverted; then									# But if we want to enter S3, we've got stuff to do first:
 			clear_screen											# Clear the screen, don't bother the user.
 			turn_lights_off											# Turn off all the lights, don't bother the user.
 			unload_nvidia											# Unload ugly nvidia drivers. They fcuk up sleep states.
+			enable_wakeup_sources TXHC XHCI							# Enable XHCI USB 3.2 and Thunderbolt USB 4 wakeup source
 			enter_S3off												# Finally enter userlevel S3/STR followed by a system reboot.
 		fi
 	fi
