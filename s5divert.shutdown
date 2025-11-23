@@ -224,8 +224,8 @@ poweroff_mbp111() {
 		set_s5divert S3
 		disable_all_wakeup_sources
 		enable_wakeup_sources EC
-		wait_lid_closed && enable_lid_wakeup || disable_lid_wakeup
-		S5toS3_diverted && ! ac_power_connected && enable_wakeup_sources ADP1
+		# wait_lid_closed && enable_lid_wakeup || disable_lid_wakeup
+		ac_power_connected || enable_wakeup_sources ADP1
 		S5toS3_diverted && enter_S3off
 	fi
 	return 0
