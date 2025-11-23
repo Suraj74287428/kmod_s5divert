@@ -221,8 +221,9 @@ poweroff_mbp111() {
 	S5toS3_diverted && ! ac_power_connected && set_s5divert S4
 	if S5toS4_diverted || S5toS3_diverted; then
 		clear_screen && turn_lights_off
-		enable_wakeup_sources ADP1
+		disable_all_wakeup_sources
 		wait_lid_closed && enable_lid_wakeup || disable_lid_wakeup
+		enable_wakeup_sources EC ADP1 LID0
 		S5toS3_diverted && enter_S3off
 	fi
 	return 0
